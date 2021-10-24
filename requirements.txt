@@ -1,0 +1,9 @@
+streamlit==1.0.0
+numpy
+pandas
+plotly
+scipy
+hydralit_components
+streamlit_analytics
+psycopg2
+openpyxl
