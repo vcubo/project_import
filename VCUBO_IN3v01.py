@@ -6,6 +6,7 @@ import io
 
 import streamlit as st
 
+st.set_page_config(page_title='Project import - vcubo', page_icon='/Users/facu/Desktop/VCUBO/03 DESIGN/IMAGES/favicon.png',menu_items={'Get Help': 'https://vcubo.co/contact','Report a bug': "https://vcubo.co/contact",'About': " Unbiased risk ananlysis. *vcubo*"})
 @st.cache(allow_output_mutation=True, hash_funcs={"_thread.RLock": lambda _: None})
 def init_connection():
     return psycopg2.connect(**st.secrets["postgres_prod"])
@@ -48,10 +49,10 @@ def read_blob(file):
 
 
 @st.cache(ttl=600)
-def upload_blob(project_id, path_to_file):
+def upload_blob(project_id, uploaded_file):
     """ insert a BLOB into a table """
     # read data
-    file = open(path_to_file, 'rb').read()
+    file = uploaded_file
     # execute the INSERT statement
     cur.execute("INSERT INTO pr_imported_main(project_id, project_file) " +
             "VALUES(%s, %s)",
@@ -97,18 +98,24 @@ with st.expander('', expanded=False):
     #st.dataframe(read_blob('vcubo_project_import.xlsx'))
 st.subheader('IMPORT PROJECT DATA')
 with st.expander('', expanded=False):
-    st.session_state.path_to_upload =st.text_input('IMPORT FILE PATH:')
+    #st.session_state.path_to_upload =st.text_input('IMPORT FILE PATH:')
+    uploaded_file = st.file_uploader('SELECT FILE', type='xlsm')
+
     st.session_state.project_id = st.text_input('PROJECT ID:')
     st.session_state.pr_ids_main = pd.read_sql(f"SELECT l1_id  FROM pr_main", conn2)
     st.session_state.pr_ids_upl = pd.read_sql(f"SELECT project_id  FROM pr_imported_main", conn2)
-    if st.session_state.project_id in st.session_state.pr_ids_main['l1_id'].tolist():
+    if st.session_state.project_id =='':
+        st.warning(f'ENTER PROJECT ID')
+    elif st.session_state.project_id in st.session_state.pr_ids_main['l1_id'].tolist():
         st.warning(f'PROJECT ID {st.session_state.project_id} ALREADY EXISTS IN MAIN DATABASE')
     elif st.session_state.project_id in st.session_state.pr_ids_upl['project_id'].tolist():
         st.warning(f'PROJECT ID {st.session_state.project_id} ALREADY IMPORTED (WAITING FOR VALIDATION)')
     else:
         upload_project_file = st.button('UPLOAD PROJECT')
-        if upload_project_file:
-            upload_blob(st.session_state.project_id, st.session_state.path_to_upload)
+        type(uploaded_file)=="<class 'NoneType'>"
+        st.write(type(uploaded_file))
+        if (upload_project_file and type(uploaded_file)!='NoneType'):
+            upload_blob(st.session_state.project_id, uploaded_file.getvalue())
             time.sleep(2)
             uploaded_bytes = read_uploaded(st.session_state.project_id)
             uploaded_io = io.BytesIO()
