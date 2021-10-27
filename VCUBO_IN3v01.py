@@ -6,7 +6,7 @@ import io
 
 import streamlit as st
 
-st.set_page_config(page_title='Project import - vcubo', page_icon='/Users/facu/Desktop/VCUBO/03 DESIGN/IMAGES/favicon.png',menu_items={'Get Help': 'https://vcubo.co/contact','Report a bug': "https://vcubo.co/contact",'About': " Unbiased risk ananlysis. *vcubo*"})
+st.set_page_config(page_title='Project import - vcubo', page_icon='favicon.png',menu_items={'Get Help': 'https://vcubo.co/contact','Report a bug': "https://vcubo.co/contact",'About': " Unbiased risk ananlysis. *vcubo*"})
 @st.cache(allow_output_mutation=True, hash_funcs={"_thread.RLock": lambda _: None})
 def init_connection():
     return psycopg2.connect(**st.secrets["postgres_prod"])
