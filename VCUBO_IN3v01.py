@@ -19,6 +19,7 @@ def check_password():
             == st.secrets["passwords"][st.session_state["username"]]
         ):
             st.session_state["password_correct"] = True
+            st.session_state.com_id = st.session_state["username"] # store user for com_id field
             del st.session_state["password"]  # don't store username + password
             del st.session_state["username"]
         else:
@@ -43,7 +44,7 @@ def check_password():
         st.text_input(
             "Password", type="password", on_change=password_entered, key="password"
         )
-        st.error("😕 User not known or password incorrect")
+        st.error("Incorrect user or password 😕")
         return False
     else:
         # Password correct.
@@ -93,14 +94,14 @@ if check_password():
 
 
     @st.cache(ttl=600)
-    def upload_blob(project_id, uploaded_file):
+    def upload_blob(project_id, uploaded_file, company_id):
         """ insert a BLOB into a table """
         # read data
         file = uploaded_file
         # execute the INSERT statement
-        cur.execute("INSERT INTO pr_imported(project_id, project_file) " +
-                "VALUES(%s, %s)",
-                (project_id, psycopg2.Binary(file)))
+        cur.execute("INSERT INTO pr_imported(l1_id, project_file, com_id) " +
+                "VALUES(%s, %s, %s)",
+                (project_id, psycopg2.Binary(file), company_id))
         # commit the changes to the database
         conn2.commit()
         # close the communication with the PostgresQL database
@@ -158,14 +159,14 @@ if check_password():
         st.warning(f'ENTER UNIQUE PROJECT ID')
     elif st.session_state.project_id in st.session_state.pr_ids_main['l1_id'].tolist():
         st.warning(f'PROJECT ID {st.session_state.project_id} ALREADY EXISTS IN MAIN DATABASE')
-    elif st.session_state.project_id in st.session_state.pr_ids_upl['project_id'].tolist():
+    elif st.session_state.project_id in st.session_state.pr_ids_upl['l1_id'].tolist():
         st.warning(f'PROJECT ID {st.session_state.project_id} ALREADY IMPORTED (WAITING FOR VALIDATION)')
     else:
         upload_project_file = st.button('UPLOAD PROJECT')
         #type(uploaded_file)=="<class 'NoneType'>"
         st.warning(f'pre-uploaded file type: {type(uploaded_file)}')
         if (upload_project_file and type(uploaded_file)!='NoneType'):
-            upload_blob(st.session_state.project_id, uploaded_file.getvalue())
+            upload_blob(st.session_state.project_id, uploaded_file.getvalue(), st.session_state.com_id)
             time.sleep(2)
             uploaded_bytes = read_uploaded(st.session_state.project_id)
             uploaded_io = io.BytesIO()
