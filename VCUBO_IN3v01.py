@@ -98,7 +98,7 @@ if check_password():
         # read data
         file = uploaded_file
         # execute the INSERT statement
-        cur.execute("INSERT INTO pr_imported_main(project_id, project_file) " +
+        cur.execute("INSERT INTO pr_imported(project_id, project_file) " +
                 "VALUES(%s, %s)",
                 (project_id, psycopg2.Binary(file)))
         # commit the changes to the database
@@ -107,7 +107,7 @@ if check_password():
         #cur.close()
 
     def read_uploaded(project_id):
-        cur.execute(""" SELECT project_id, project_file FROM pr_imported_main WHERE project_id= %s """, (project_id,))
+        cur.execute(""" SELECT project_id, project_file FROM pr_imported WHERE project_id= %s """, (project_id,))
         blob = cur.fetchone()
         #cur.close()
         return bytes(blob[1])
@@ -153,7 +153,7 @@ if check_password():
     st.session_state.project_id = st.text_input('PROJECT ID:')
     st.session_state.project_desc = st.text_area('BRIEF PROJECT DESCRIPTION', max_chars=200)
     st.session_state.pr_ids_main = pd.read_sql(f"SELECT l1_id  FROM pr_main", conn2)
-    st.session_state.pr_ids_upl = pd.read_sql(f"SELECT project_id  FROM pr_imported_main", conn2)
+    st.session_state.pr_ids_upl = pd.read_sql(f"SELECT project_id  FROM pr_imported", conn2)
     if st.session_state.project_id =='':
         st.warning(f'ENTER UNIQUE PROJECT ID')
     elif st.session_state.project_id in st.session_state.pr_ids_main['l1_id'].tolist():
