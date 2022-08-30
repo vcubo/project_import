@@ -7,3 +7,4 @@ hydralit_components
 streamlit_analytics
 psycopg2-binary
 openpyxl
+psycopg2
