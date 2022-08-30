@@ -53,7 +53,7 @@ def check_password():
 
 if check_password():
 
-    @st.cache(allow_output_mutation=True, hash_funcs={"_thread.RLock": lambda _: None})
+    @st.cache(allow_output_mutation=True), hash_funcs={"_thread.RLock": lambda _: None})
     def init_connection():
         return psycopg2.connect(**st.secrets["postgres_prod"])
 
